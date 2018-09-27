@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
-using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Xamarin.Android.RecyclerView;
 using Xamarin.Android.RecyclerView.Model;
+using Newtonsoft.Json;
+using static Android.Provider.SyncStateContract;
+using Android.Util;
+using Xamarin.Android.RecyclerView.Services;
 
 namespace MyXamarinApp
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-
-        private List<News> newsList;
+        private HttpService<Post> service;
+        private List<Post> postList;
         private RecyclerView recyclerView;
         private RecyclerView.LayoutManager layoutManager;
         private NewsAdapter adapter;
@@ -32,16 +39,21 @@ namespace MyXamarinApp
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
 
+            //http service initialize
+            service = new HttpService<Post>();
+            postList = new List<Post>();
 
-            newsList = new List<News>();
-            DataInit();
+            //Running httpclient process in seperate thread
+            Task.Run(async () => await DataInitAsync());
 
             recyclerView = FindViewById<RecyclerView>(Resource.Id.recyclerView);
             layoutManager = new LinearLayoutManager(this);
-            adapter = new NewsAdapter(newsList);
+            adapter = new NewsAdapter(postList);
 
             recyclerView.SetLayoutManager(layoutManager);
             recyclerView.SetAdapter(adapter);
+
+
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -67,15 +79,23 @@ namespace MyXamarinApp
             Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
                 .SetAction("Action", (View.IOnClickListener)null).Show();
         }
+        
 
-        public void DataInit()
+        public async Task DataInitAsync()
         {
-            News news = new News() { Heading = "Heading 1", Content = "First Content"};
-            newsList.Add(news);
+            List<Post> jsonPostList = await service.GetDataAsync();
 
-            news = new News() { Heading = "Heading 2", Content = "Second Content" };
-            newsList.Add(news);
+                foreach (var item in jsonPostList)
+                {
+                    Log.Debug("Posts:", "Name: " + item.name.ToString());
+
+                    var post = new Post() { email = item.email, body = item.body };
+                    postList.Add(post);
+                }
+
+                adapter.NotifyDataSetChanged();
         }
+        
 	}
 }
 

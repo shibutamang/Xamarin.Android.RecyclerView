@@ -10,20 +10,20 @@ namespace MyXamarinApp
 {
     public class NewsAdapter : RecyclerView.Adapter
     {
-        private readonly List<News> newsList;
+        private readonly List<Post> postList;
 
-        public NewsAdapter(List<News> news)
+        public NewsAdapter(List<Post> posts)
         {
-            newsList = news;
+            postList = posts;
         }
 
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             MyViewHolder h = holder as MyViewHolder;
-            News news = newsList[position];
-            h.Title.Text = news.Heading;
-            h.Content.Text = news.Content;
+            Post post = postList[position];
+            h.Email.Text = post.email;
+            h.Body.Text = post.body;
         }
 
         //INITIALIZE VH
@@ -41,7 +41,7 @@ namespace MyXamarinApp
         {
             get
             {
-                return newsList.Count;
+                return postList.Count;
             }
         } 
 
@@ -51,14 +51,14 @@ namespace MyXamarinApp
          */
         internal class MyViewHolder : RecyclerView.ViewHolder
         {
-            public TextView Title { get; set; }
-            public TextView Content { get; set; }
+            public TextView Email { get; set; }
+            public TextView Body { get; set; }
 
             public MyViewHolder(View itemView)
                 : base(itemView)
             {
-                Title = itemView.FindViewById<TextView>(Resource.Id.title);
-                Content = itemView.FindViewById<TextView>(Resource.Id.news);
+                Email = itemView.FindViewById<TextView>(Resource.Id.email);
+                Body = itemView.FindViewById<TextView>(Resource.Id.body);
             }
         }
 }
